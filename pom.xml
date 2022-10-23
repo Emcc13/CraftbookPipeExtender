@@ -72,15 +72,16 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>LATEST</version>
+            <version>1.18.2-R0.1-SNAPSHOT</version>
+<!--            <version>LATEST</version>-->
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>LATEST</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.bukkit</groupId>-->
+<!--            <artifactId>bukkit</artifactId>-->
+<!--            <version>LATEST</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>net.ess3</groupId>
             <artifactId>EssentialsX</artifactId>
