@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -61,6 +62,14 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
         }
     }
 
+    private void toggle_persist(UUID player){
+        if (this.persistendPlayer.contains(player)){
+            this.persistendPlayer.remove(player);
+        }else {
+            this.persistendPlayer.add(player);
+        }
+    }
+
     private class PipeAddPersist implements CommandExecutor {
         private CraftbookPipeCreator main;
 
@@ -71,11 +80,7 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
         @Override
         public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
             if (sender instanceof Player && (((Player) sender).hasPermission("pipeCreator") || sender.isOp())) {
-                if (this.main.persistendPlayer.contains(((Player) sender).getUniqueId())){
-                    this.main.persistendPlayer.remove(((Player) sender).getUniqueId());
-                }else {
-                    this.main.persistendPlayer.add(((Player) sender).getUniqueId());
-                }
+                this.main.toggle_persist(((Player) sender).getUniqueId());
             }
             return false;
         }
@@ -90,6 +95,23 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
             }
         }
     }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event){
+        UUID player = event.getPlayer().getUniqueId();
+        if (this.persistendPlayer.contains(player)){
+            this.persistendPlayer.remove(player);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerChangeWord(PlayerChangedWorldEvent event){
+        UUID player = event.getPlayer().getUniqueId();
+        if (this.persistendPlayer.contains(player)){
+            this.persistendPlayer.remove(player);
+        }
+    }
+
 
 
     @EventHandler
