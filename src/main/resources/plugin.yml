@@ -1,7 +1,7 @@
 name: CraftbookPipeSignExtender
 author: Emcc13
 description: Extending Craftbook Pipe Signs
-version: 0.3
+version: 0.4
 api-version: 1.18
 
 main: com.github.Emcc13.CraftbookPipeCreator
