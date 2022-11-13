@@ -9,8 +9,8 @@ main: com.github.Emcc13.CraftbookPipeCreator
 commands:
   pipeadd:
     description: add item to pipe sign
-  pipeadd_persist:
-    description: persistened state to add item to pipe sign
+#  pipeadd_persist:
+#    description: persistened state to add item to pipe sign
 
 permissions:
   pipeCreator:
