@@ -1,7 +1,7 @@
 name: CraftbookPipeSignExtender
 author: Emcc13
 description: Extending Craftbook Pipe Signs
-version: 0.4
+version: 0.5
 api-version: 1.18
 
 main: com.github.Emcc13.CraftbookPipeCreator
@@ -9,8 +9,10 @@ main: com.github.Emcc13.CraftbookPipeCreator
 commands:
   pipeadd:
     description: add item to pipe sign
-#  pipeadd_persist:
-#    description: persistened state to add item to pipe sign
+  pipeinfo:
+    description: get text of pipe sign
+  pipeclear:
+    description: remove text of pipe sign
 
 permissions:
   pipeCreator:

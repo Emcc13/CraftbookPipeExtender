@@ -24,18 +24,26 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnable {
-    private Map<UUID, Timestamp> activePlayer;
-    private Set<UUID> persistendPlayer;
+    private Map<UUID, Timestamp> add_player;
+    private Map<UUID, Timestamp> info_player;
+    private Map<UUID, Timestamp> clear_player;
+    private Set<UUID> persistend_add_player;
+    private Set<UUID> persistend_info_player;
 
     public void onEnable() {
-        activePlayer = new HashMap<UUID, Timestamp>();
-        persistendPlayer = new HashSet<UUID>();
+        add_player = new HashMap<UUID, Timestamp>();
+        info_player = new HashMap<UUID, Timestamp>();
+        clear_player = new HashMap<UUID, Timestamp>();
+        persistend_add_player = new HashSet<UUID>();
+        persistend_info_player = new HashSet<UUID>();
 
         PipeAdd pipeAdd = new PipeAdd(this);
-//        PipeAddPersist pipeAddPersist = new PipeAddPersist(this);
+        PipeInfo pipeInfo = new PipeInfo(this);
+        PipeClear pipeClear = new PipeClear(this);
 
         getCommand("pipeadd").setExecutor(pipeAdd);
-//        getCommand("pipeadd_persist").setExecutor(pipeAddPersist);
+        getCommand("pipeinfo").setExecutor(pipeInfo);
+        getCommand("pipeclear").setExecutor(pipeClear);
         getServer().getPluginManager().registerEvents(this, this);
         Bukkit.getScheduler().runTaskTimerAsynchronously(
                 this, this, 5 * 20,
@@ -57,29 +65,84 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
         public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
             if (sender instanceof Player && (((Player) sender).hasPermission("pipeCreator") || sender.isOp())) {
                 if (args.length > 0) {
-                    if (args[0].toLowerCase().equals("persist")) {
-                        this.main.toggle_persist(((Player) sender));
+                    if (args[0].equalsIgnoreCase("persist")) {
+                        this.main.toggle_add_persist(((Player) sender));
                     } else {
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&bPXFL&7-&bPipe&7] verwende '/pipeadd' oder '/pipeadd persist'"));
                     }
                 } else {
-                    this.main.activePlayer.put(((Player) sender).getUniqueId(), new Timestamp(System.currentTimeMillis()));
+                    this.main.add_player.put(((Player) sender).getUniqueId(), new Timestamp(System.currentTimeMillis()));
                 }
             }
             return false;
         }
     }
 
-    private void toggle_persist(Player player) {
+    private class PipeInfo implements CommandExecutor{
+        private CraftbookPipeCreator main;
+
+        public PipeInfo(CraftbookPipeCreator creator) {
+            main = creator;
+        }
+
+        @Override
+        public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+            if (sender instanceof Player && (((Player) sender).hasPermission("pipeCreator") || sender.isOp())) {
+                if (args.length > 0) {
+                    if (args[0].equalsIgnoreCase("persist")) {
+                        this.main.toggle_info_persist(((Player) sender));
+                    } else {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&bPXFL&7-&bPipe&7] verwende '/pipeinfo' oder '/pipeinfo persist'"));
+                    }
+                } else {
+                    this.main.info_player.put(((Player) sender).getUniqueId(), new Timestamp(System.currentTimeMillis()));
+                }
+            }
+            return false;
+        }
+    }
+
+    private class PipeClear implements CommandExecutor{
+        private CraftbookPipeCreator main;
+
+        public PipeClear(CraftbookPipeCreator creator) {
+            main = creator;
+        }
+
+        @Override
+        public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+            if (sender instanceof Player && (((Player) sender).hasPermission("pipeCreator") || sender.isOp())) {
+//                this.main.add_player.remove(((Player) sender).getUniqueId());
+//                this.main.persistend_add_player.remove(((Player) sender).getUniqueId());
+                this.main.clear_player.put(((Player) sender).getUniqueId(), new Timestamp(System.currentTimeMillis()));
+            }
+            return false;
+        }
+    }
+
+    private void toggle_add_persist(Player player) {
         UUID player_id = player.getUniqueId();
-        if (this.persistendPlayer.contains(player_id)) {
-            this.persistendPlayer.remove(player_id);
+        if (this.persistend_add_player.contains(player_id)) {
+            this.persistend_add_player.remove(player_id);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&bPXFL&7-&bPipe&7] &3Pipe-Persist ist nun &cdeaktiviert&3!"));
         } else {
-            this.persistendPlayer.add(player_id);
+            this.persistend_add_player.add(player_id);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&bPXFL&7-&bPipe&7] &3Pipe-Persist ist nun &aaktiviert&3!"));
         }
-        this.activePlayer.remove(player_id);
+        this.add_player.remove(player_id);
+    }
+
+    private void toggle_info_persist(Player player) {
+        UUID player_id = player.getUniqueId();
+        if (this.persistend_info_player.contains(player_id)) {
+            this.persistend_info_player.remove(player_id);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&bPXFL&7-&bPipe&7] &3Pipe-Persist ist nun &cdeaktiviert&3!"));
+        } else {
+            this.persistend_info_player.add(player_id);
+//            this.persistend_add_player.remove(player_id);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&bPXFL&7-&bPipe&7] &3Pipe-Persist ist nun &aaktiviert&3!"));
+        }
+        this.info_player.remove(player_id);
     }
 
 //    private class PipeAddPersist implements CommandExecutor {
@@ -101,9 +164,14 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
     @Override
     public void run() {
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        for (Map.Entry<UUID, Timestamp> entry : activePlayer.entrySet()) {
+        for (Map.Entry<UUID, Timestamp> entry : add_player.entrySet()) {
             if (now.getTime() - entry.getValue().getTime() > 200000) {
-                activePlayer.remove(entry.getKey());
+                add_player.remove(entry.getKey());
+            }
+        }
+        for (Map.Entry<UUID, Timestamp> entry : info_player.entrySet()) {
+            if (now.getTime() - entry.getValue().getTime() > 200000) {
+                info_player.remove(entry.getKey());
             }
         }
     }
@@ -111,17 +179,15 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID player = event.getPlayer().getUniqueId();
-        if (this.persistendPlayer.contains(player)) {
-            this.persistendPlayer.remove(player);
-        }
+        this.persistend_add_player.remove(player);
+        this.persistend_info_player.remove(player);
     }
 
     @EventHandler
     public void onPlayerChangeWord(PlayerChangedWorldEvent event) {
         UUID player = event.getPlayer().getUniqueId();
-        if (this.persistendPlayer.contains(player)) {
-            this.persistendPlayer.remove(player);
-        }
+        this.persistend_add_player.remove(player);
+        this.persistend_info_player.remove(player);
     }
 
 
@@ -141,22 +207,38 @@ public class CraftbookPipeCreator extends JavaPlugin implements Listener, Runnab
                     event.getClickedBlock().getBlockData() instanceof org.bukkit.block.data.type.Sign)) {
                 return;
             }
-            if (!(this.activePlayer.containsKey(player.getUniqueId()) || this.persistendPlayer.contains(player.getUniqueId()))) {
+            if (!((Sign) event.getClickedBlock().getState()).getLines()[1].equals("[Pipe]")) {
                 return;
             }
-            if (!((Sign) event.getClickedBlock().getState()).getLines()[1].equals("[Pipe]")
-            ) {
-                return;
+            if (this.clear_player.containsKey(player.getUniqueId())){
+                Sign s = (Sign) event.getClickedBlock().getState();
+                s.setLine(line_idx, "");
+                s.update();
+                this.clear_player.remove(event.getPlayer().getUniqueId());
+                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes(
+                        '&', "&7[&bPXFL&7-&bPipe&7] &3Das Pipe Schild wurde in Zeile %LINE% geleert!"
+                                .replace("%LINE%", String.valueOf(line_idx + 1))));
             }
-            String toAdd = getStringFromItem(player.getInventory().getItemInMainHand());
-            Sign s = (Sign) event.getClickedBlock().getState();
-            s.setLine(line_idx, s.getLine(line_idx) + ((s.getLine(line_idx).length() > 1) ? "," : "") + toAdd);
-            s.update();
-            this.activePlayer.remove(event.getPlayer().getUniqueId());
-            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes(
-                    '&', "&7[&bPXFL&7-&bPipe&7] &3%ITEM% wurde dem Pipe Schild in der %LINE%. Zeile hinzugefügt!"
-                            .replace("%ITEM%", toAdd).replace("%LINE%", String.valueOf(line_idx + 1))));
-        } catch (NullPointerException e) {
+            if (this.add_player.containsKey(player.getUniqueId()) ||
+                    this.persistend_add_player.contains(player.getUniqueId())){
+                String toAdd = getStringFromItem(player.getInventory().getItemInMainHand());
+                Sign s = (Sign) event.getClickedBlock().getState();
+                s.setLine(line_idx, s.getLine(line_idx) + ((s.getLine(line_idx).length() > 1) ? "," : "") + toAdd);
+                s.update();
+                this.add_player.remove(event.getPlayer().getUniqueId());
+                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes(
+                        '&', "&7[&bPXFL&7-&bPipe&7] &3%ITEM% wurde dem Pipe Schild in der %LINE%. Zeile hinzugefügt!"
+                                .replace("%ITEM%", toAdd).replace("%LINE%", String.valueOf(line_idx + 1))));
+            }
+            if (this.info_player.containsKey(player.getUniqueId()) ||
+                    this.persistend_info_player.contains(player.getUniqueId())) {
+                String line = ((Sign) event.getClickedBlock().getState()).getLine(line_idx);
+                this.info_player.remove(event.getPlayer().getUniqueId());
+                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes(
+                        '&', "&7[&bPXFL&7-&bPipe&7] &3Das Pipe Schild enthält in Zeile %LINE% die Items: %ITEM%"
+                                .replace("%ITEM%", line).replace("%LINE%", String.valueOf(line_idx + 1))));
+            }
+        } catch (NullPointerException ignored) {
         }
     }
 
